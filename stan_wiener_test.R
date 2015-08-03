@@ -7,7 +7,7 @@ library(rstan)
 # beta (b): Initial bias Bias for either response (beta > 0.5 means bias towards "upper" response 'A'). 0 < beta < 1
 # delta (v): Drift rate Quality of the stimulus (delta close to 0 means ambiguous stimulus or weak ability). 0 < delta
 # tau (ter): Nondecision time + Motor response time + encoding time (high means slow encoding, execution). 0 < ter (in seconds)
-n_per_condition = 2000
+n_per_condition = 500
 
 resp = rbind(rwiener(n_per_condition,delta = .2, alpha = 1.25, beta = .5, tau = .2),
              rwiener(n_per_condition,delta = .2, alpha = 1.25, beta = .4, tau = .2),
@@ -22,22 +22,22 @@ stan_data2 = list(Nu = sum(resp$resp == "upper"),
                   RTl = resp$q[resp$resp == "lower"],
                   K = length(unique(resp$condition)),
                   su = table(resp$condition[resp$resp == "upper"]),
-                  sl = table(resp$condition[resp$resp == "lower"]))
+                  sl = table(resp$condition[resp$resp == "lower"]),
+                  minRT = min(resp[,1]))
 
 inits = list(alpha = c(1,1,1,1),
              beta = c(.5,.5,.5,.5),
              delta = c(0,0,0,0),
              tau = c(.1,.1,.1,.1))
 
+fit = stan(file = "stan_wiener_test2.stan",data = stan_data2,iter = 1000)
+fit = stan(fit = fit,data = stan_data2,init = list(inits,inits,inits,inits),iter = 1000)
+
 fit = stan(fit = fit,
            data = stan_data2,
            chains = 4,
            init = list(inits,inits,inits,inits),
            iter = 1000)
-
-fit = stan(file = "stan_wiener_test2.stan",data = stan_data2,iter = 1000)
-fit = stan(fit = fit,data = stan_data2,init = list(inits,inits,inits,inits),iter = 1000)
-
 
 
 

@@ -6,13 +6,14 @@ data {
   int<lower=0> K; // # of groups
   int su[K]; // group sizes upper boundary responses
   int sl[K]; // group sizes lower boundary responses
+  real minRT;
 }
 
 parameters {
   real delta[K];
   real<lower=0, upper=10> alpha[K];
   real<lower=0, upper=1> beta[K];
-  real<lower=.1, upper=1> tau[K]; # upper boundary of tau should be smaller than minimum RT
+  real<lower=.1, upper=minRT> tau[K]; # upper boundary of tau should be smaller than minimum RT
 }
 
 model {
