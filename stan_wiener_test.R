@@ -45,3 +45,8 @@ for (p in c("delta","alpha","beta","tau")) {
   points(1:5,mhat,pch = 8)
   segments(1:5,CI[,1],1:5,CI[,2])
 }
+legend("topleft",
+       legend = c("true","est + CI"),
+       pch = c(19,8),
+       col= c("red","black"),
+       bty = "n")
