@@ -29,7 +29,7 @@ model {
   tau ~ cauchy(0,.1); 
   beta ~ beta(1.1,1.1);*/
   
-  /*this are nor great priors for delta and alpha
+  /*this are not great priors for delta and alpha
   they avoid impossible high parameter values
   but they have the largest mass at/around 0
   which are also unlike parameter values*/ 
