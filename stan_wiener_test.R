@@ -9,12 +9,18 @@ library(rstan)
 # tau (ter): Nondecision time + Motor response time + encoding time (high means slow encoding, execution). 0 < ter (in seconds)
 n_per_condition = 250
 
-resp = rbind(rwiener(n_per_condition,delta = .5, alpha = 1.25, beta = .5, tau = .15),
-             rwiener(n_per_condition,delta = .5, alpha = 1.25, beta = .4, tau = .15),
-             rwiener(n_per_condition,delta = .7, alpha = 1.25, beta = .6, tau = .15),
-             rwiener(n_per_condition,delta = .5, alpha = 1.5, beta = .5, tau = .2))
-resp$condition  = sort(rep(1:4,n_per_condition))
+true_paras = data.frame(delta = c(.5, .7, .5, .5, .5),
+                        alpha = c(1.25, 1.25, 1.5, 1.25, 1.25),
+                        beta = c(.5, .5, .5, .4, .5),
+                        tau = c(.15,.15,.15,.15,.2))
 
+resp = c()
+for (k in 1:5) resp = rbind(resp, rwiener(n_per_condition,
+                                          true_paras$alpha[k],
+                                          true_paras$tau[k],
+                                          true_paras$beta[k],
+                                          true_paras$delta[k]))
+resp$condition  = sort(rep(1:5,n_per_condition))
 
 stan_data = list(Nu = sum(resp$resp == "upper"),
                   Nl = sum(resp$resp == "lower"),
@@ -26,5 +32,16 @@ stan_data = list(Nu = sum(resp$resp == "upper"),
                   minRT = min(resp[,1]))
 
 m = stan_model(file = "stan_wiener_test.stan")
-fit = sampling(m,data = stan_data,iter = 400,seed = 1234)
+fit = sampling(m,data = stan_data,iter = 1000,seed = 1234)
 
+
+s = summary(fit)[[1]]
+par(mfrow = c(2,2), mar = c(2.5,2.5,2,2))
+for (p in c("delta","alpha","beta","tau")) {
+  mhat = s[grep(p,rownames(s)),"mean"]
+  CI = s[grep(p,rownames(s)),c("2.5%","97.5%")]
+  plot(1:5,true_paras[,p],col = "red", pch = 19,
+       ylim = range(cbind(CI,true_paras[,p])),main = p,ylab = "",xlab = "")
+  points(1:5,mhat,pch = 8)
+  segments(1:5,CI[,1],1:5,CI[,2])
+}
