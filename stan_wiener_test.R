@@ -36,18 +36,17 @@ for (s in 1:5) {
   
 }
 
-m = stan_model(file = "stan_wiener_test.stan")
-fit = sampling(m,data = stan_data,iter = 1000,seed = 1234)
 
-shift = seq(-.25,.25,length = 5)
-
-
+# fitted models with cmdstan 
+# m = stan_model(file = "stan_wiener_test.stan")
+# fit = sampling(m,data = stan_data,iter = 1000,seed = 1234)
 
 fits = vector(mode = "list",length = 5) 
 for (s in 1:5) {fits[[s]] = read_stan_csv(paste0("samples",s,".csv"))}
 
 
 
+shift = seq(-.25,.25,length = 5)
 par(mfrow = c(2,2), mar=c(3,3,2,1), mgp=c(2,.7,0), tck=-.01)
 
 for (p in c("delta","alpha","beta","tau")) {
